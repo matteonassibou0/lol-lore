@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Générateur de Champion IA - V19 (Gemini Sécurisé)</title>
+    <link rel="icon" type="image/png" href="https://upload.wikimedia.org/wikipedia/commons/2/20/League_of_Legends_Logo_Icon.png">
+    <link rel="apple-touch-icon" href="https://upload.wikimedia.org/wikipedia/commons/2/20/League_of_Legends_Logo_Icon.png">
+    
+    <style>
+        /* Styles de base et mise en page */
+        body {
+            background-color: #091428;
+            color: #C8AA6E;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            text-align: center;
+        }
+        
+        .container {
+            border: 2px solid #C8AA6E;
+            padding: 40px;
+            border-radius: 10px;
+            background: radial-gradient(circle, #0A323C 0%, #091428 100%);
+            box-shadow: 0 0 20px #C8AA6E;
+            max-width: 800px;
+            width: 90%;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #C8AA6E;
+            padding-bottom: 10px;
+        }
+
+        /* Styles pour le Logo visible */
+        #app-logo {
+            display: block; 
+            margin: 0 auto 20px auto; 
+            max-width: 150px; 
+            height: auto;
+            border-radius: 50%; 
+            box-shadow: 0 0 10px #C8AA6E; 
+        }
+
+        /* Styles des boîtes de résultats */
+        .result-box {
+            background-color: rgba(0, 0, 0, 0.4);
+            margin: 10px 0;
+            padding: 15px;
+            border-left: 4px solid #0AC8B9;
+            text-align: left;
+            font-size: 1.1em;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            min-height: 30px;
+            opacity: 0.5;
+            transition: all 0.5s ease;
+        }
+        
+        #box-relation { border-left: 4px solid #FF5733; }
+        #box-lore { 
+            display: block; 
+            border-left: 4px solid #C8AA6E;
+            min-height: 80px;
+        }
+
+        .result-box.active {
+            opacity: 1;
+            background-color: rgba(10, 200, 185, 0.1);
+            border-left: 4px solid #C8AA6E;
+            transform: scale(1.02);
+        }
+        
+        #box-relation.active {
+            background-color: rgba(255, 87, 51, 0.1); 
+            border-left: 4px solid #C8AA6E;
+        }
+
+        .label {
+            font-weight: bold;
+            color: #F0E6D2;
+        }
+
+        .value {
+            color: #0AC8B9;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 1.1em;
+        }
+
+        #lore {
+            font-size: 0.9em; 
+            text-transform: none; 
+            color: #F0E6D2;
+            margin-top: 10px;
+            display: block;
+            width: 100%;
+            white-space: pre-wrap;
+            font-weight: normal;
+        }
+        
+        /* Styles pour les boutons */
+        .button-group {
+            margin-top: 30px;
+            display: flex;
+            justify-content: center;
+            gap: 20px; 
+        }
+        
+        button {
+            padding: 15px 40px;
+            font-size: 1.2em;
+            background-color: #1E2328;
+            color: #C8AA6E;
+            border: 2px solid #C8AA6E;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #C8AA6E;
+            color: #091428;
+            box-shadow: 0 0 15px #C8AA6E;
+        }
+        
+        button:disabled {
+            background-color: #333;
+            border-color: #555;
+            color: #777;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+        
+        #copyBtn {
+            background-color: #0AC8B9;
+            color: #1E2328;
+            border-color: #0AC8B9;
+            opacity: 0.5;
+        }
+
+        #copyBtn:hover:not(:disabled) {
+            background-color: #069c90;
+            color: white;
+            box-shadow: 0 0 15px #0AC8B9;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <img id="app-logo" src="https://upload.wikimedia.org/wikipedia/commons/2/20/League_of_Legends_Logo_Icon.png" alt="Logo de l'application">
+    
+    <h1>CONCEPTION DE CHAMPION IA (GEMINI)</h1>
+    
+    <div class="result-box" id="box-name">
+        <span class="label">👤 Nom du Champion :</span>
+        <span class="value" id="champ-name"></span>
+    </div>
+    <div class="result-box" id="box-relation">
+        <span class="label">❤️ Relation :</span>
+        <span class="value" id="relation"></span>
+    </div>
+    <div class="result-box" id="box-origin">
+        <span class="label">📍 Origine :</span>
+        <span class="value" id="origin"></span>
+    </div>
+    <div class="result-box" id="box-height">
+        <span class="label">📏 Taille :</span>
+        <span class="value" id="height"></span>
+    </div>
+    <div class="result-box" id="box-power">
+        <span class="label">✨ Pouvoirs :</span>
+        <span class="value" id="power"></span>
+    </div>
+    <div class="result-box" id="box-weapon">
+        <span class="label">⚔️ Arme :</span>
+        <span class="value" id="weapon"></span>
+    </div>
+    <div class="result-box" id="box-role">
+        <span class="label">🛡️ Rôle :</span>
+        <span class="value" id="role"></span>
+    </div>
+    <div class="result-box" id="box-type">
+        <span class="label">🎯 Type d'attaque :</span>
+        <span class="value" id="type"></span>
+    </div>
+    <div class="result-box" id="box-feature">
+        <span class="label">⭐ Caractéristique :</span>
+        <span class="value" id="feature"></span>
+    </div>
+    <div class="result-box" id="box-lore">
+        <span class="label">📜 Lore :</span>
+        <span class="value" id="lore" style="font-size: 0.9em; text-transform: none; color: #F0E6D2;"></span>
+    </div>
+
+    <div class="button-group">
+        <button id="spinBtn">Lancer la Conception IA (Gemini)</button>
+        <button id="copyBtn" disabled>📋 Copier le Champion</button>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        
+        // --- CONFIGURATION API ---
+        // !!! REMPLACEZ CETTE LIGNE PAR L'URL DE VOTRE SERVICE WEB APPS SCRIPT !!!
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwAoRrpB6Ub6oGBOh7dHVnIxJ3POaWV9rjqgoWOeiyyvgqFoujKx1iIZgCgbN87ZUVS/exec'; 
+        // --- FIN CONFIGURATION API ---
+
+        // --- FONCTION DE COPIE ---
+        async function copyChampionData() {
+            const copyBtn = document.getElementById('copyBtn');
+            const originalText = copyBtn.innerText;
+            
+            try {
+                // Collecter les données
+                const name = document.getElementById('champ-name').innerText;
+                const relation = document.getElementById('relation').innerText;
+                const origin = document.getElementById('origin').innerText;
+                const height = document.getElementById('height').innerText;
+                const power = document.getElementById('power').innerText;
+                const weapon = document.getElementById('weapon').innerText;
+                const role = document.getElementById('role').innerText;
+                const type = document.getElementById('type').innerText;
+                const feature = document.getElementById('feature').innerText;
+                const lore = document.getElementById('lore').innerText; 
+
+                // Formater le texte complet
+                const championText = 
+`--- Fiche Champion Généré (Gemini) ---
+Nom: ${name}
+Relation: ${relation}
+Origine: ${origin}
+Taille: ${height}
+Pouvoirs: ${power}
+Arme: ${weapon}
+Rôle: ${role}
+Type d'attaque: ${type}
+Caractéristique: ${feature}
+
+📜 Lore:
+${lore}
+-----------------------------`;
+
+                await navigator.clipboard.writeText(championText);
+
+                copyBtn.innerText = "COPIÉ !";
+                setTimeout(() => {
+                    copyBtn.innerText = originalText;
+                }, 2000);
+
+            } catch (err) {
+                console.error('Erreur de copie:', err);
+                copyBtn.innerText = "ERREUR (Copie manuelle nécessaire)"; 
+                setTimeout(() => {
+                    copyBtn.innerText = originalText;
+                }, 3000);
+            }
+        }
+
+
+        // --- FONCTION PRINCIPALE (Appel API Asynchrone Sécurisé) ---
+        async function startSequence() {
+            const spinBtn = document.getElementById('spinBtn');
+            const copyBtn = document.getElementById('copyBtn');
+            
+            // Nettoyage de l'affichage
+            const allBoxes = document.querySelectorAll('.result-box');
+            allBoxes.forEach(box => {
+                const valueEl = box.querySelector('.value');
+                if (valueEl) valueEl.innerText = "";
+                box.classList.remove('active');
+            });
+
+            try {
+                spinBtn.disabled = true;
+                copyBtn.disabled = true; 
+                spinBtn.innerText = "CONNEXION SÉCURISÉE À GEMINI...";
+
+                // Appel au service Web Google Apps Script
+                const response = await fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Erreur HTTP! Statut: ${response.status}`);
+                }
+
+                const char = await response.json();
+
+                if (char.error) {
+                    throw new Error(char.error);
+                }
+
+                spinBtn.innerText = "DONNÉES REÇUES...";
+
+                // Définition de la séquence d'affichage des caractéristiques
+                const sequence = [
+                    { id: 'champ-name', val: char.name, box: 'box-name' },
+                    { id: 'relation', val: char.relation, box: 'box-relation' },
+                    { id: 'origin', val: char.origin, box: 'box-origin' },
+                    { id: 'height', val: char.height, box: 'box-height' },
+                    { id: 'power', val: char.power, box: 'box-power' },
+                    { id: 'weapon', val: char.weapon, box: 'box-weapon' },
+                    { id: 'role', val: char.role, box: 'box-role' },
+                    { id: 'type', val: char.type, box: 'box-type' },
+                    { id: 'feature', val: char.feature, box: 'box-feature' },
+                    { id: 'lore', val: char.lore, box: 'box-lore' } 
+                ];
+                
+
+                // Affichage avec animation progressive
+                sequence.forEach((step, index) => {
+                    setTimeout(() => {
+                        const el = document.getElementById(step.id);
+                        const box = document.getElementById(step.box);
+                        
+                        if (el && box) {
+                            box.classList.add('active');
+                            el.innerText = step.val;
+                        }
+                    }, index * 100); 
+                });
+
+                // Rétablissement des boutons
+                setTimeout(() => {
+                    spinBtn.disabled = false;
+                    spinBtn.innerText = "Relancer la Conception IA (Gemini)";
+                    copyBtn.disabled = false;
+                }, sequence.length * 100 + 500);
+
+
+            } catch (error) {
+                spinBtn.disabled = false;
+                copyBtn.disabled = true;
+                spinBtn.innerText = "Relancer (ERREUR API)";
+                
+                const errorText = error.message ? error.message : "Erreur inconnue. Vérifiez le lien Apps Script et le déploiement sur GitHub.";
+                document.getElementById('champ-name').innerText = `API ERREUR: ${errorText.substring(0, 50)}...`;
+                document.getElementById('box-name').classList.add('active');
+                console.error("ERREUR CRITIQUE V19:", error);
+            }
+        }
+        // --- FIN FONCTION PRINCIPALE ---
+
+        // --- Attachement Sécurisé des Clicks ---
+        const spinButton = document.getElementById('spinBtn');
+        const copyButton = document.getElementById('copyBtn');
+
+        if (spinButton) {
+            spinButton.addEventListener('click', startSequence);
+        }
+        if (copyButton) {
+            copyButton.addEventListener('click', copyChampionData);
+        }
+    });
+</script>
+
+</body>
+</html>
